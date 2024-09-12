@@ -13,3 +13,7 @@ ___
 - whoami — показать имя текущего пользователя.
 - mv <source> <destination> — переместить файл или директорию.
 - tree — отобразить структуру директорий.
+___
+## Тестирование
+### Запуск программы
+![zapusk](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/zapusk.png?raw=true)
