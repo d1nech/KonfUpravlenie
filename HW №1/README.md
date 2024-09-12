@@ -17,3 +17,15 @@ ___
 ## Тестирование
 ### Запуск программы
 ![zapusk](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/zapusk.png?raw=true)
+### Команда ls
+![ls](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/ls.png?raw=true)
+### Команда cd
+![cd](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/cd.png?raw=true)
+### Команда whoami
+![whoami](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/whoami.png?raw=true)
+### Команда tree
+![tree](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/tree.png?raw=true)
+### Команда mv
+![mv](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/mv.png?raw=true)
+![resultmv](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/resultmv.png?raw=true)
+
