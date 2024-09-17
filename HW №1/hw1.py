@@ -2,92 +2,105 @@ import argparse
 import os
 import tarfile
 import tempfile
+import tkinter as tk
+from tkinter import scrolledtext, messagebox, filedialog  # Импортируем filedialog
 
-# 1. Обработка аргументов командной строки
-def parse_arguments():
-    """Парсит аргументы командной строки."""
-    parser = argparse.ArgumentParser(description='Shell Emulator')
-    parser.add_argument('vfs_path', type=str, help='Path to the virtual filesystem archive (tar file)')
-    return parser.parse_args()
+class ShellEmulatorGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Shell Emulator")
+        
+        self.vfs_path = None
+        self.current_dir = None
+        
+        self.output_area = scrolledtext.ScrolledText(master, wrap=tk.WORD, height=20)
+        self.output_area.pack(padx=10, pady=10)
+        
+        self.input_area = tk.Entry(master, width=50)
+        self.input_area.pack(padx=10, pady=10)
+        
+        self.input_area.bind("<Return>", self.process_command)
+        
+        self.start_button = tk.Button(master, text="Start VFS", command=self.start_vfs)
+        self.start_button.pack(pady=5)
 
-# 2. Распаковка архива
-def extract_vfs(vfs_path):
-    """Извлекает виртуальную файловую систему из tar-архива."""
-    temp_dir = tempfile.mkdtemp()  # Создание временной директории
-    with tarfile.open(vfs_path, 'r') as tar:
-        tar.extractall(temp_dir)  # Извлечение содержимого архива
-    return temp_dir
+    def start_vfs(self):
+        self.vfs_path = filedialog.askopenfilename(title="Select VFS Archive", filetypes=[("Tar files", "*.tar")])
+        if self.vfs_path:
+            self.current_dir = self.extract_vfs(self.vfs_path)
+            self.output_area.insert(tk.END, f"Welcome to the Shell Emulator! Current directory: {self.current_dir}\n")
 
-# 3. Реализация команд
-def ls(current_dir):
-    """Возвращает список файлов и директорий в текущей директории."""
-    return os.listdir(current_dir)
+    def extract_vfs(self, vfs_path):
+        temp_dir = tempfile.mkdtemp()
+        with tarfile.open(vfs_path, 'r') as tar:
+            tar.extractall(temp_dir)
+        return temp_dir
 
-def cd(current_dir, new_dir):
-    """Изменяет текущую директорию на новую."""
-    new_path = os.path.join(current_dir, new_dir)
-    if os.path.isdir(new_path):
-        return new_path
-    else:
-        raise FileNotFoundError(f"{new_dir} not found")
-
-def exit_emulator():
-    """Выход из эмулятора."""
-    print("Exiting emulator.")
-    exit(0)
-
-def whoami():
-    """Возвращает имя текущего пользователя."""
-    return os.getlogin()
-
-def mv(source, destination):
-    """Перемещает файл или директорию из source в destination."""
-    os.rename(source, destination)
-
-def tree(directory):
-    """Рекурсивно отображает структуру директорий."""
-    result = []
-    for root, dirs, files in os.walk(directory):
-        level = root.replace(directory, '').count(os.sep)
-        indent = ' ' * 4 * (level)
-        result.append(f"{indent}{os.path.basename(root)}/")
-        for f in files:
-            result.append(f"{indent}    {f}")
-    return "\n".join(result)
-
-# 4. Запуск эмулятора
-if __name__ == "__main__":
-    args = parse_arguments()  # Парсинг аргументов
-    vfs_path = args.vfs_path
-    
-    current_dir = extract_vfs(vfs_path)  # Извлечение виртуальной файловой системы
-    
-    print(f"Welcome to the Shell Emulator! Current directory: {current_dir}\n")
-    
-    while True:
-        command = input(f"{current_dir}> ")  # Ввод команды от пользователя
+    def process_command(self, event):
+        command = self.input_area.get()
+        self.input_area.delete(0, tk.END)
         
         try:
             if command.startswith("ls"):
-                output = ls(current_dir)
-                print("\n".join(output))
+                output = self.ls(self.current_dir)
+                self.display_output("\n".join(output))
             elif command.startswith("cd "):
                 _, new_dir = command.split(maxsplit=1)
-                current_dir = cd(current_dir, new_dir)
-                print(f"Changed directory to: {current_dir}")
+                self.current_dir = self.cd(self.current_dir, new_dir)
+                self.display_output(f"Changed directory to: {self.current_dir}")
             elif command == "exit":
-                break
+                self.exit_emulator()
             elif command == "whoami":
-                output = whoami()
-                print(output)
+                output = self.whoami()
+                self.display_output(output)
             elif command.startswith("mv "):
                 _, source, destination = command.split(maxsplit=2)
-                mv(source, destination)
-                print(f"Moved {source} to {destination}")
+                source_path = os.path.join(self.current_dir, source)
+                destination_path = os.path.join(self.current_dir, destination)
+                self.mv(source_path, destination_path)
+                self.display_output(f"Moved {source} to {destination}")
             elif command.startswith("tree"):
-                output = tree(current_dir)
-                print(output)
+                output = self.tree(self.current_dir)
+                self.display_output(output)
             else:
-                print(f"Command not found: {command}")
+                self.display_output(f"Command not found: {command}")
         except Exception as e:
-            print(str(e))
+            messagebox.showerror("Error", str(e))
+
+    def display_output(self, text):
+        self.output_area.insert(tk.END, text + "\n")
+
+    def ls(self, current_dir):
+        return os.listdir(current_dir)
+
+    def cd(self, current_dir, new_dir):
+        new_path = os.path.join(current_dir, new_dir)
+        if os.path.isdir(new_path):
+            return new_path
+        else:
+            raise FileNotFoundError(f"{new_dir} not found")
+
+    def exit_emulator(self):
+        self.output_area.insert(tk.END, "Exiting emulator.\n")
+        self.master.quit()
+
+    def whoami(self):
+        return os.getlogin()
+
+    def mv(self, source, destination):
+        os.rename(source, destination)
+
+    def tree(self, directory):
+        result = []
+        for root, dirs, files in os.walk(directory):
+            level = root.replace(directory, '').count(os.sep)
+            indent = ' ' * 4 * (level)
+            result.append(f"{indent}{os.path.basename(root)}/")
+            for f in files:
+                result.append(f"{indent}    {f}")
+        return "\n".join(result)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ShellEmulatorGUI(root)
+    root.mainloop()
