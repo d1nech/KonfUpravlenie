@@ -14,6 +14,9 @@ ___
 - mv <source> <destination> — переместить файл или директорию.
 - tree — отобразить структуру директорий.
 ___
+## Тестирование с помощью Pytest
+![pytest](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/Снимок%20экрана%202024-09-17%20183759.png?raw=true)
+___
 ## Тестирование
 ### Запуск программы
 ![zapusk](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/zapusk.png?raw=true)
