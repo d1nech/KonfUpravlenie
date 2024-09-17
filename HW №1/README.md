@@ -28,4 +28,9 @@ ___
 ### Команда mv
 ![mv](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/mv.png?raw=true)
 ![resultmv](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/resultmv.png?raw=true)
-
+___
+## GUI
+### Выбираем виртуальную файловую систему
+![GUIstart](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/Снимок%20экрана%202024-09-17%20180316.png?raw=true)
+### Тестирование команд ls,whoami,tree
+![GUItest](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№1/testimg/Снимок%20экрана%202024-09-17%20180335.png?raw=true)
