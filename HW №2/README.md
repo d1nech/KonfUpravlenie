@@ -11,4 +11,10 @@ ___
 Для запуска программы необходимо написать в терминале `python main.py <путь до apk файла> <название нового файла в который будет сохранен граф>`
 ___
 ## Тестирование программы
-Запуск:
+Запуск: в качестве примера возьмем файл test.apk
+
+![test](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/Снимок%20экрана%202024-09-29%20002637.png?raw=true)
+
+Получаем на выходе:
+
+![result](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/graph.png?raw=true)
