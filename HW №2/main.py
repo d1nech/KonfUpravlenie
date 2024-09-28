@@ -21,7 +21,7 @@ def build_graph(dependencies):
     dot = Digraph(comment='Граф зависимостей')
     
     for dep in dependencies:
-        dot.node(dep)  
+        dot.node(dep)  # Добавляем узел для каждой зависимости
 
     for dep in dependencies:
         dot.edge(dep, dep)  
@@ -54,4 +54,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
