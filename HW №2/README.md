@@ -18,3 +18,7 @@ ___
 Получаем на выходе:
 
 ![result](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/graph.png?raw=true)
+
+## Тестирование программы c помощью pytest
+
+![pytest](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/Снимок%20экрана%202024-09-29%20005407.png?raw=true)
