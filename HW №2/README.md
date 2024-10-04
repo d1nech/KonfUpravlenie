@@ -15,9 +15,9 @@ ___
 
 ![test](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/Снимок%20экрана%202024-09-29%20002637.png?raw=true)
 
-Получаем на выходе:
+Получаем на выходе 2 файла:
 
-![result](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/graph.png?raw=true)
+![resultpng](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/graph.png?raw=true) ![resulttxt](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/Снимок%20экрана%202024-10-04%20154023.png?raw=true)
 
 ## Тестирование программы c помощью pytest
 
