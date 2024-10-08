@@ -13,40 +13,52 @@ def get_dependencies(package_name):
 
     soup = BeautifulSoup(response.content, 'html.parser')
     
-    # Ищем блок с зависимостями
     dependencies = []
     depends_section = soup.find('summary', string=lambda text: text and 'Depends' in text)
     
     if depends_section:
-        # Находим следующий элемент списка после "Depends"
         ul = depends_section.find_next('ul')
         if ul:
             for li in ul.find_all('li'):
                 dep = li.text.strip()
+                if dep.startswith("so:"):
+                    dep = dep[3:]
+                    dep = dep.split('.')[0]
+                
                 if dep and dep not in dependencies:
                     dependencies.append(dep)
 
-    return dependencies  # Возвращаем только прямые зависимости
+    return dependencies
 
-def create_dependency_graph(package_name, output_file):
+def create_dependency_graph(package_name, output_file, visited=None):
+    if visited is None:
+        visited = set()
+
     dependencies = get_dependencies(package_name)
     
-    with open(output_file, 'w') as f:
-        f.write("digraph dependencies {\n")
-        for dep in dependencies:
-            f.write(f'    "{package_name}" -> "{dep}";\n')
-            # Получаем только прямые зависимости для текущей зависимости
+    graph_lines = []
+    
+    for dep in dependencies:
+        if dep not in visited:
+            visited.add(dep)
+            graph_lines.append(f"{package_name} -> {dep}")
+            
             sub_dependencies = get_dependencies(dep)
             for sub_dep in sub_dependencies:
-                f.write(f'    "{dep}" -> "{sub_dep}";\n')
-        f.write("}\n")
-    
-    print(f"Граф зависимостей сохранен в {output_file}")
+                graph_lines.append(f"{dep} -> {sub_dep}")
+                create_dependency_graph(sub_dep, output_file, visited)
+
+    with open(f"{output_file}.txt", 'w') as f:
+        f.write('digraph depends{\n')
+        for line in graph_lines:
+            f.write(line + '\n')
+        f.write('}')
+    print(f"Граф зависимостей сохранен в {output_file}.txt")
 
 def main():
     parser = argparse.ArgumentParser(description='Получить зависимости пакета из Alpine Linux.')
     parser.add_argument('--package', required=True, help='Название пакета')
-    parser.add_argument('--output-file', required=True, help='Имя выходного файла для графа зависимостей')
+    parser.add_argument('--output-file', required=True, help='Имя выходного файла для графа зависимостей (без расширения)')
     
     args = parser.parse_args()
     
