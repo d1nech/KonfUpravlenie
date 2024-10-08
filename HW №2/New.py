@@ -1,21 +1,25 @@
 import argparse
-import subprocess
+import requests
+from bs4 import BeautifulSoup
 from graphviz import Digraph
 
 def get_dependencies(package_name):
-    """Получает зависимости пакета из Alpine Linux с помощью apk."""
+    """Получает зависимости пакета из Alpine Linux через HTTP-запрос."""
     dependencies = set()
+    url = f"https://pkgs.alpinelinux.org/package/v3.15/main/x86_64/{package_name}"  # Замените на актуальную версию и архитектуру
+
     try:
-        # Запускаем команду apk для получения зависимостей
-        result = subprocess.run(['apk', 'info', '--depends', package_name], 
-                                capture_output=True, text=True, check=True)
-        
-        # Обрабатываем вывод
-        for line in result.stdout.splitlines():
-            dep = line.strip()
-            if dep:
-                dependencies.add(dep)
-    except subprocess.CalledProcessError as e:
+        response = requests.get(url)
+        response.raise_for_status()  # Проверка на ошибки HTTP
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Предположим, что зависимости находятся в определенном элементе
+        # Это нужно адаптировать под структуру страницы
+        dep_list = soup.find_all('li', class_='dependency')  # Замените на актуальный селектор
+        for dep in dep_list:
+            dependencies.add(dep.text.strip())
+            
+    except requests.RequestException as e:
         print(f"Ошибка при получении зависимостей для {package_name}: {e}")
     return dependencies
 
@@ -49,20 +53,17 @@ def save_dependencies_to_txt(dependencies, output_file):
 
 def main():
     parser = argparse.ArgumentParser(description='Визуализатор графа зависимостей для пакетов Alpine Linux.')
-    
-    # Получаем имя пакета от пользователя
-    package_name = input("Введите имя пакета: ")
-    
-    # Получаем имя выходного файла от пользователя
-    output_file_name = input("Введите имя выходного файла (без расширения): ")
-    
-    # Получаем путь для сохранения от пользователя
-    output_path = input("Введите путь для сохранения файла (например, ./): ")
-    
-    full_output_path = f"{output_path}/{output_file_name}"
+    parser.add_argument('--package', required=True, help='Имя пакета для получения зависимостей')
+    parser.add_argument('--output-file', required=True, help='Имя выходного файла (без расширения)')
+    parser.add_argument('--output-path', default='./', help='Путь для сохранения файла (по умолчанию ./)')
+
+    args = parser.parse_args()
+
+    # Формируем полный путь для сохранения
+    full_output_path = f"{args.output_path}/{args.output_file}"
 
     # Получаем зависимости
-    dependencies = get_dependencies(package_name)
+    dependencies = get_dependencies(args.package)
 
     # Строим граф
     graph = build_graph(dependencies)
