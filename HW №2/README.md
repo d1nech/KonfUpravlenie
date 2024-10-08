@@ -4,20 +4,17 @@ ___
 Этот проект представляет собой инструмент командной строки для визуализации графа зависимостей, включая транзитивные зависимости
 ___
 ## Использование
-Перед началом использования фалйа необходимо загрузить библиотеку Graphviz.
-`pip install graphviz`
-___
-## Запуск программы
-Для запуска программы необходимо написать в терминале `python main.py <путь до apk файла> <название нового файла в который будет сохранен граф>`
-___
-## Тестирование программы
-Запуск: в качестве примера возьмем файл test.apk
+Перед началом использования фалйа необходимо загрузить библиотеку Graphviz, requests,bs4.
+`pip install graphviz requests bs4`
 
-![test](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/Снимок%20экрана%202024-09-29%20002637.png?raw=true)
+## Тестирование программы
+Запуск: в качестве примера возьмем пакет curl
+
+![test](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/zapusk.png?raw=true)
 
 Получаем на выходе 2 файла:
 
-![resultpng](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/graph.png?raw=true) ![resulttxt](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/Снимок%20экрана%202024-10-04%20154023.png?raw=true)
+![resultpng](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/graphimg.png?raw=true) ![resulttxt](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/graphtxt.png?raw=true)
 
 ## Тестирование программы c помощью pytest
 
