@@ -10,7 +10,7 @@ def get_dependencies(package_name):
     if response.status_code != 200:
         print(f"Ошибка при получении данных для пакета {package_name}: {response.status_code}")
         return []
-    
+
     soup = BeautifulSoup(response.content, 'html.parser')
     
     # Ищем блок с зависимостями
@@ -26,7 +26,7 @@ def get_dependencies(package_name):
                 if dep and dep not in dependencies:
                     dependencies.append(dep)
 
-    return dependencies
+    return dependencies  # Возвращаем только прямые зависимости
 
 def create_dependency_graph(package_name, output_file):
     dependencies = get_dependencies(package_name)
@@ -35,6 +35,10 @@ def create_dependency_graph(package_name, output_file):
         f.write("digraph dependencies {\n")
         for dep in dependencies:
             f.write(f'    "{package_name}" -> "{dep}";\n')
+            # Получаем только прямые зависимости для текущей зависимости
+            sub_dependencies = get_dependencies(dep)
+            for sub_dep in sub_dependencies:
+                f.write(f'    "{dep}" -> "{sub_dep}";\n')
         f.write("}\n")
     
     print(f"Граф зависимостей сохранен в {output_file}")
