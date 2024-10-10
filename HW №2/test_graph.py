@@ -1,57 +1,75 @@
 import pytest
-from main import get_dependencies, build_graph, save_graph_to_file
-from graphviz import Digraph
-import os
+import graphviz
+from unittest.mock import patch, Mock
+from main import get_dependencies, create_dependency_graph
 
-# Тестируем функцию получения зависимостей
-def test_get_dependencies(tmp_path):
-    # Создаем временный файл с зависимостями
-    test_file = tmp_path / "test_package.txt"
-    test_file.write_text("depends: package1 package2\n")
-
-    dependencies = get_dependencies(test_file)
-
-    assert dependencies == {"package1", "package2"}
-
-def test_get_dependencies_empty_file(tmp_path):
-    # Создаем пустой файл
-    test_file = tmp_path / "empty_package.txt"
-    test_file.write_text("")
-
-    dependencies = get_dependencies(test_file)
-
-    assert dependencies == set()
-
-def test_get_dependencies_invalid_file(tmp_path):
-    # Создаем файл с неправильным форматом
-    test_file = tmp_path / "invalid_package.txt"
-    test_file.write_text("some random text\n")
-
-    dependencies = get_dependencies(test_file)
-
-    assert dependencies == set()
-
-# Тестируем функцию построения графа
-def test_build_graph():
-    dependencies = {"package1", "package2"}
-    dot = build_graph(dependencies)
-
-    assert isinstance(dot, Digraph)
-    assert len(dot.body) == 4  # Должно быть два узла
-
-# Тестируем сохранение графа (можно проверить только, что функция выполняется)
-def test_save_graph_to_file(tmp_path):
-    dot = Digraph(comment='Test Graph')
-    dot.node('A')
-    dot.node('B')
+# Тест для функции get_dependencies
+def test_get_dependencies():
+    package_name = "example-package"
     
-    output_file = tmp_path / "test_output"
+    # Создаем фиктивный HTML-контент для ответа
+    mock_html = """
+    <html>
+        <body>
+            <summary>Depends on:</summary>
+            <ul>
+                <li>so:libc.so.6</li>
+                <li>so:libm.so.6</li>
+                <li>other-package</li>
+            </ul>
+        </body>
+    </html>
+    """
     
-    save_graph_to_file(dot, output_file)
+    with patch('requests.get') as mock_get:
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.content = mock_html.encode('utf-8')
+        mock_get.return_value = mock_response
+        
+        dependencies = get_dependencies(package_name)
+        
+        assert dependencies == ['libc', 'libm', 'other-package']
 
-    # Проверяем, что файл был создан
-    assert os.path.exists(f"{output_file}.png")
+def test_get_dependencies_invalid_package():
+    package_name = "invalid-package"
+    
+    with patch('requests.get') as mock_get:
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_get.return_value = mock_response
+        
+        dependencies = get_dependencies(package_name)
+        
+        assert dependencies == []
 
-# Запуск тестов
+# Тест для функции create_dependency_graph
+@patch('main.get_dependencies')
+def test_create_dependency_graph(mock_get_dependencies):
+    mock_get_dependencies.side_effect = [
+        ['dep1', 'dep2'],  # Зависимости для package_name
+        ['subdep1'],       # Зависимости для dep1
+        []                 # Зависимости для dep2 (пусто)
+    ]
+    
+    output_file = 'test_output'
+    
+    # Запускаем функцию
+    create_dependency_graph('package_name', output_file)
+    
+    # Проверяем, что файл был создан и содержит правильные данные
+    with open(f"{output_file}.txt", 'r') as f:
+        content = f.read()
+        
+    expected_content = (
+        'digraph depends{n'
+        '"package_name" -> "dep1"n'
+        '"package_name" -> "dep2"n'
+        '"dep1" -> "subdep1"n'
+        '}'
+    )
+    
+    assert content.strip() == expected_content.strip()
+
 if __name__ == "__main__":
     pytest.main()
