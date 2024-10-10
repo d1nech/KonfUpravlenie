@@ -41,11 +41,11 @@ def create_dependency_graph(package_name, output_file, visited=None):
     for dep in dependencies:
         if dep not in visited:
             visited.add(dep)
-            graph_lines.append(f"{package_name} -> {dep}")
+            graph_lines.append(f'"{package_name}" -> "{dep}"')
             
             sub_dependencies = get_dependencies(dep)
             for sub_dep in sub_dependencies:
-                graph_lines.append(f"{dep} -> {sub_dep}")
+                graph_lines.append(f'"{dep}" -> "{sub_dep}"')
                 create_dependency_graph(sub_dep, output_file, visited)
 
     with open(f"{output_file}.txt", 'w') as f:
