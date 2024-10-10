@@ -14,8 +14,8 @@ ___
 
 Получаем на выходе 2 файла:
 
-![resultpng](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/graphimg.png?raw=true) ![resulttxt](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/graphtxt.png?raw=true)
+![resultpng](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/resultgraph.png?raw=true) ![resulttxt](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/resulttxt.png?raw=true)
 
 ## Тестирование программы c помощью pytest
 
-![pytest](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/Снимок%20экрана%202024-09-29%20005407.png?raw=true)
+![pytest](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/pytest.png?raw=true)
