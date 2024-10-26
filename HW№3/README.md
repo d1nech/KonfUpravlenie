@@ -9,4 +9,4 @@ ___
 ![output](https://github.com/d1nech/KonfUpravlenie/blob/main/HW№3/testimg/output.png?raw=true)
 ___
 ## Тестирование с помощью Pytest
-![pytest](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№2/img/zapusk.png?raw=true)
+![pytest](https://github.com/d1nech/KonfUpravlenie/blob/main/HW№3/testimg/pytest.png?raw=true)
