@@ -20,9 +20,5 @@ def test_parse_assignment():
     with pytest.raises(ValueError):
         parse_assignment('not a valid assignment;')
 
-# Тест для функции main можно написать только в случае
-# если вы хотите протестировать ввод/вывод.
-# Это может быть сделано с помощью mock.
-
 if __name__ == "__main__":
     pytest.main()
