@@ -79,17 +79,16 @@ def parse_assignment(line: str, memory: Dict[str, Any]) -> (str, Any):
         value = parse_value(match.group(2).strip(), memory)
         return name, value
 
-    # Handle allowed_ips separately
-    if line.startswith('allowed_ips ='):
-        key = 'allowed_ips'
-        value = parse_value(line[len(key) + 3:].strip(), memory)
-        return key, value
-
-    # Handle dict assignment as well
+    # Handle any array assignment
     if '=' in line:
         key, value = line.split('=', 1)
         key = key.strip()
         value = value.strip()
+        if value.startswith('(') and value.endswith(')'):
+            value = parse_value(value, memory)
+            return key, value
+
+        # Handle dict assignment as well
         if value.startswith('dict('):
             value = parse_value(value, memory)
             return key, value
