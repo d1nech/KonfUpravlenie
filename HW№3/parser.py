@@ -1,23 +1,41 @@
 import re
 import json
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 def parse_value(value: str, memory: Dict[str, Any]) -> Any:
     value = value.strip()
 
-    # Array parsing
+    # Array parsing with support for nested arrays
     if value.startswith('({') and value.endswith('})'):
         value = value[2:-2].strip()
-        elements = [parse_value(el.strip(), memory) for el in value.split(',')] if value else []
+        elements = []
+        current_element = ""
+        nesting_level = 0
+
+        for i, char in enumerate(value):
+            if char == '(' and i + 1 < len(value) and value[i + 1] == '{':
+                nesting_level += 1
+                current_element += char
+            elif char == '}' and nesting_level > 0:
+                nesting_level -= 1
+                current_element += char
+            elif char == ',' and nesting_level == 0:
+                elements.append(parse_value(current_element.strip(), memory))
+                current_element = ""
+            else:
+                current_element += char
+
+        if current_element:
+            elements.append(parse_value(current_element.strip(), memory))
         return elements
 
-    # Dictionary parsing
+    # Dictionary parsing with recursion for nested dictionaries
     if value.startswith('dict(') and value.endswith(')'):
         value = value[5:-1].strip()
-        items = [item.strip() for item in re.split(r',\s*(?=\w+\s*=)', value)]
+        items = re.split(r',\s*(?=\w+\s*=)', value)
         dct = {}
         for item in items:
-            key_value = item.split('=')
+            key_value = item.split('=', 1)
             if len(key_value) != 2:
                 raise ValueError(f"Invalid dictionary entry: {item}")
             key = key_value[0].strip()
@@ -33,65 +51,33 @@ def parse_value(value: str, memory: Dict[str, Any]) -> Any:
     if re.match(r'^\d+$', value):
         return int(value)
 
+    # Boolean parsing
+    if value in {"True", "False"}:
+        return value == "True"
+
     # Variable lookup
     if value in memory:
         return memory[value]
 
-    # Expression evaluation
-    match = re.match(r'^\$(\S+)\s+(.+?)\s*\$$', value)
-    if match:
-        operation = match.group(1)
-        operands = match.group(2).strip().split()
-        return evaluate_expression(operation, operands, memory)
-
     raise ValueError(f"Invalid value: {value}")
 
-def evaluate_expression(operation: str, operands: List[str], memory: Dict[str, Any]) -> Any:
-    if operation not in {'+', '-', '*', '/', 'max'}:
-        raise ValueError(f"Invalid operation: {operation}")
-
-    values = [parse_value(op.strip(), memory) for op in operands]
-
-    if operation == '+':
-        return sum(values)
-    elif operation == '-':
-        return values[0] - sum(values[1:])
-    elif operation == '*':
-        result = 1
-        for v in values:
-            result *= v
-        return result
-    elif operation == '/':
-        if len(values) != 2:
-            raise ValueError("Division requires exactly two operands.")
-        return values[0] / values[1]
-    elif operation == 'max':
-        return max(values)
-
 def parse_assignment(line: str, memory: Dict[str, Any]) -> (str, Any):
-    if not line.endswith(';'):
-        raise ValueError("Line must end with a semicolon.")
+    line = line.strip()  # Remove surrounding whitespace
 
-    line = line[:-1].strip()
     match = re.match(r'def\s+([_a-zA-Z]+)\s*=\s*(.+)', line)
     if match:
         name = match.group(1).strip()
-        value = parse_value(match.group(2).strip(), memory)
+        value = match.group(2).strip()
+
+        # Check if the value is a dictionary or array, which requires a semicolon
+        if (value.startswith('({') and value.endswith('});')) or (value.startswith('dict(') and value.endswith(');')):
+            value = parse_value(value[:-1], memory)  # Strip the final semicolon for parsing
+        elif not (value.startswith('({') or value.startswith('dict(')):  # No semicolon needed for constants
+            value = parse_value(value, memory)
+        else:
+            raise ValueError("Dictionary and array values must end with a semicolon.")
+
         return name, value
-
-    # Handle any array assignment
-    if '=' in line:
-        key, value = line.split('=', 1)
-        key = key.strip()
-        value = value.strip()
-        if value.startswith('(') and value.endswith(')'):
-            value = parse_value(value, memory)
-            return key, value
-
-        # Handle dict assignment as well
-        if value.startswith('dict('):
-            value = parse_value(value, memory)
-            return key, value
 
     raise ValueError(f"Invalid assignment: {line}")
 
@@ -118,4 +104,4 @@ def main():
     print(json.dumps(memory, indent=4))
 
 if __name__ == '__main__':
-    main()
+    main()  
