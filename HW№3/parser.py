@@ -69,13 +69,11 @@ def parse_assignment(line: str, memory: Dict[str, Any]) -> (str, Any):
         name = match.group(1).strip()
         value = match.group(2).strip()
 
-        # Check if the value is a dictionary or array, which requires a semicolon
-        if (value.startswith('({') and value.endswith('});')) or (value.startswith('dict(') and value.endswith(');')):
-            value = parse_value(value[:-1], memory)  # Strip the final semicolon for parsing
-        elif not (value.startswith('({') or value.startswith('dict(')):  # No semicolon needed for constants
+        # Check if the value is a dictionary or array
+        if (value.startswith('({') and value.endswith('})')) or (value.startswith('dict(') and value.endswith(')')):
             value = parse_value(value, memory)
-        else:
-            raise ValueError("Dictionary and array values must end with a semicolon.")
+        elif not (value.startswith('({') or value.startswith('dict(')):
+            value = parse_value(value, memory)
 
         return name, value
 
@@ -104,4 +102,4 @@ def main():
     print(json.dumps(memory, indent=4))
 
 if __name__ == '__main__':
-    main()  
+    main()
