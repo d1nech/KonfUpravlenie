@@ -91,8 +91,7 @@ def interpreter(input_file, output_file, mem_range):
     tree.write(output_file)
 
 def parse_binary_commands(bc):
-    # Placeholder function to convert binary commands to executable form
-    # This needs to be implemented to properly parse the bytecode into instructions
+
     return []
 
 def main():
