@@ -16,5 +16,5 @@ result.xml - Файл с результатами выполнения инте�
 test_main.py - Тестирование базовых функций
 ___
 ## Тестирование с помощью Pytest функции move, write, read, bitwise_rotate_right
-![pytest](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№4/img/Снимок%20экрана%202024-11-19%20183913.png?raw=true)
+![pytest](https://github.com/d1nech/KonfUpravlenie/blob/main/HW%20№4/img/Снимок%20экрана%202024-11-23%20143320.png?raw=true)
 
