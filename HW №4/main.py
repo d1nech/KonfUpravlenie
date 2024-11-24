@@ -2,11 +2,12 @@ import argparse
 import xml.etree.ElementTree as ET
 
 def assembler(input_file, output_file, log_file):
+    # Чтение исходного кода
     with open(input_file, 'r') as f:
         code = [eval(line.strip()) for line in f.readlines()]
     
-    bc = []
-    log_entries = []
+    bc = []  # Список для бинарных данных
+    log_entries = []  # Лог-записи для XML
     for line_num, (op, *args) in enumerate(code, start=1):
         try:
             if op == 'move':
@@ -39,11 +40,11 @@ def assembler(input_file, output_file, log_file):
             print(f"Error in input file: {e}")
             return
     
-    # Write binary output
+    # Запись бинарного файла
     with open(output_file, 'wb') as f:
         f.write(bytearray(bc))
     
-    # Write log file
+    # Запись лога в XML
     root = ET.Element("log")
     for entry in log_entries:
         instruction = ET.SubElement(root, "instruction")
@@ -59,14 +60,14 @@ def serializer(cmd, fields, size):
     return bits.to_bytes(size, 'little')
 
 def interpreter(input_file, output_file, mem_range):
+    # Чтение бинарного файла
     with open(input_file, 'rb') as f:
         bc = f.read()
     
-    memory = [0] * 100  # Увеличили размер памяти, чтобы избежать ошибок
-    regs = [0] * 10     # Увеличили количество регистров для безопасности
+    memory = [0] * 100  # Размер памяти
+    regs = [0] * 10     # Количество регистров
     
-    # Deserialize and execute commands from binary code
-    # Here we assume a specific parsing logic for commands
+    # Десериализация и выполнение команд из бинарного кода
     cmds = parse_binary_commands(bc)
     for op, *args in cmds:
         if op == "move":
@@ -82,7 +83,7 @@ def interpreter(input_file, output_file, mem_range):
             dest, src, num_bits = args
             regs[dest] = (regs[src] >> num_bits) | (regs[src] << (32 - num_bits) & 0xFFFFFFFF)
     
-    # Write results to output XML file
+    # Запись памяти в XML
     root = ET.Element("memory")
     for addr in range(mem_range[0], mem_range[1]):
         mem_entry = ET.SubElement(root, "address", attrib={"index": str(addr)})
@@ -91,8 +92,41 @@ def interpreter(input_file, output_file, mem_range):
     tree.write(output_file)
 
 def parse_binary_commands(bc):
-
-    return []
+    cmds = []
+    i = 0
+    while i < len(bc):
+        cmd = bc[i]
+        i += 1
+        if cmd == 17: 
+            
+            b = bc[i] & 0x1F  
+            c = bc[i] >> 5    
+            cmds.append(('move', b, c))
+            i += 1
+        elif cmd == 3:  
+           
+            b = bc[i] & 0x1F  
+            c = bc[i] >> 5 & 0x0F  
+            d = bc[i] >> 9    
+            cmds.append(('read', b, c, d))
+            i += 1
+        elif cmd == 1:  
+            
+            b = bc[i] & 0x1F  
+            c = bc[i] >> 5 & 0x0F  
+            d = bc[i] >> 9    
+            cmds.append(('write', b, c, d))
+            i += 1
+        elif cmd == 21:  
+            
+            b = bc[i] & 0x1F  
+            c = bc[i] >> 5    
+            cmds.append(('bitwise_rotate_right', b, c))
+            i += 1
+        else:
+            print(f"Unknown command {cmd}")
+            break
+    return cmds
 
 def main():
     parser = argparse.ArgumentParser(description='Assembler and Interpreter for a custom VM.')
