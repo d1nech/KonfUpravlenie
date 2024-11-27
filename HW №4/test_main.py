@@ -29,7 +29,58 @@ def test_assembler(tmp_path):
     assert len(root.findall('instruction')) == 2
     assert root.findall('instruction')[0].text == 'move b=1 c=3'
     assert root.findall('instruction')[1].text == 'read b=2 c=3 d=4'
+def test_full_program_execution():
+    input_file = "input.txt"
+    binary_file = "output.bin"
+    log_file = "log.xml"
+    output_file = "output.xml"
 
+    with open(input_file, "w") as f:
+        f.write(
+            """("move", 0, 7)
+("move", 1, 100)
+("move", 2, 200)
+("move", 3, 100)
+("write", 1, 3, 0)
+("move", 3, 101)
+("write", 1, 3, 1)
+("move", 3, 102)
+("write", 1, 3, 2)
+("move", 3, 103)
+("write", 1, 3, 3)
+("move", 3, 104)
+("write", 1, 3, 4)
+("move", 3, 105)
+("write", 1, 3, 5)
+("move", 3, 106)
+("write", 1, 3, 6)
+("move", 4, 0)
+("bitwise_rotate_right", 5, 1)"""
+        )
+
+    assembler(input_file=input_file, output_file=binary_file, log_file=log_file)
+
+    tree = ET.parse(log_file)
+    root = tree.getroot()
+    assert len(root.findall('instruction')) == 18
+    assert root.find("instruction").text.startswith("move b=0 c=7")
+
+    interpreter(input_file=binary_file, output_file=output_file, mem_range=(0, 10))
+
+    tree = ET.parse(output_file)
+    root = tree.getroot()
+
+    memory_values = {addr.attrib['index']: int(addr.text) for addr in root.findall("address")}
+    assert memory_values['0'] == 100
+    assert memory_values['1'] == 100
+    assert memory_values['2'] == 100
+    assert memory_values['3'] == 100
+    assert memory_values['4'] == 100
+    assert memory_values['5'] == 100
+    assert memory_values['6'] == 100
+
+    for addr in range(7, 10):
+        assert memory_values[str(addr)] == 0
 def test_interpreter(tmp_path):
     input_file = tmp_path / "input.bin"
     output_file = tmp_path / "output.xml"
