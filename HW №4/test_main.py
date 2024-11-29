@@ -58,14 +58,15 @@ def test_full_program_execution():
 ("bitwise_rotate_right", 3, 10)
 ("bitwise_rotate_right", 4, 11)
 ("bitwise_rotate_right", 5, 12)
-("bitwise_rotate_right", 6, 13)"""
+("bitwise_rotate_right", 6, 13)
+"""
         )
 
     assembler(input_file=input_file, output_file=binary_file, log_file=log_file)
 
     tree = ET.parse(log_file)
     root = tree.getroot()
-    assert len(root.findall('instruction')) == 20
+    assert len(root.findall('instruction')) == 21
     assert root.find("instruction").text.startswith("move b=0 c=7")
 
     interpreter(input_file=binary_file, output_file=output_file, mem_range=(0, 14))
