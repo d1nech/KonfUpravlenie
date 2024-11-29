@@ -98,7 +98,6 @@ def test_parse_binary_commands():
     result = parse_binary_commands(bc)
     assert result == []
 
-
 def test_load_constant():
     result = serializer(17, ((62, 5), (3, 15)), 3)
     assert result == bytes([0xD1, 0x87, 0x01])
@@ -128,6 +127,41 @@ def test_program_execution(tmp_path):
     tree = ET.parse(output_file)
     root = tree.getroot()
     assert len(root.findall('address')) == 7
+
+def test_vector_bitwise_rotate_right(tmp_path):
+    input_file = tmp_path / "input.txt"
+    binary_file = tmp_path / "output.bin"
+    log_file = tmp_path / "log.xml"
+    output_file = tmp_path / "output.xml"
+
+    input_file.write_text(
+        """("move", 0, 7)
+("move", 1, 14)
+("move", 2, 21)
+("move", 3, 28)
+("move", 4, 35)
+("move", 5, 42)
+("move", 6, 49)
+("bitwise_rotate_right", 0, 1)
+("bitwise_rotate_right", 1, 1)
+("bitwise_rotate_right", 2, 1)
+("bitwise_rotate_right", 3, 1)
+("bitwise_rotate_right", 4, 1)
+("bitwise_rotate_right", 5, 1)
+("bitwise_rotate_right", 6, 1)"""
+    )
+
+    assembler(input_file=str(input_file), output_file=str(binary_file), log_file=str(log_file))
+    interpreter(input_file=str(binary_file), output_file=str(output_file), mem_range=(0, 14))
+
+    tree = ET.parse(output_file)
+    root = tree.getroot()
+    memory_values = {addr.attrib['index']: int(addr.text) for addr in root.findall("address")}
+    
+    for i in range(7):
+        expected_value = (memory_values[str(i)] >> 1) | ((memory_values[str(i)] & 1) << 7)
+        memory_values[str(i + 7)] = expected_value
+        assert memory_values[str(i + 7)] == expected_value
 
 if __name__ == "__main__":
     pytest.main()
