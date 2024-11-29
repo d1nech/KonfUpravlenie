@@ -29,6 +29,7 @@ def test_assembler(tmp_path):
     assert len(root.findall('instruction')) == 2
     assert root.findall('instruction')[0].text == 'move b=1 c=3'
     assert root.findall('instruction')[1].text == 'read b=2 c=3 d=4'
+
 def test_full_program_execution():
     input_file = "input.txt"
     binary_file = "output.bin"
@@ -38,49 +39,45 @@ def test_full_program_execution():
     with open(input_file, "w") as f:
         f.write(
             """("move", 0, 7)
-("move", 1, 100)
-("move", 2, 200)
-("move", 3, 100)
-("write", 1, 3, 0)
-("move", 3, 101)
-("write", 1, 3, 1)
-("move", 3, 102)
-("write", 1, 3, 2)
-("move", 3, 103)
-("write", 1, 3, 3)
-("move", 3, 104)
-("write", 1, 3, 4)
-("move", 3, 105)
-("write", 1, 3, 5)
-("move", 3, 106)
-("write", 1, 3, 6)
-("move", 4, 0)
-("bitwise_rotate_right", 5, 1)"""
+("move", 1, 10)
+("move", 2, 20)
+("move", 3, 30)
+("move", 4, 40)
+("move", 5, 50)
+("move", 6, 60)
+("move", 7, 100)
+("move", 8, 200)
+("move", 9, 150)
+("move", 10, 175)
+("move", 11, 225)
+("move", 12, 250)
+("move", 13, 300)
+("bitwise_rotate_right", 0, 7)
+("bitwise_rotate_right", 1, 8)
+("bitwise_rotate_right", 2, 9)
+("bitwise_rotate_right", 3, 10)
+("bitwise_rotate_right", 4, 11)
+("bitwise_rotate_right", 5, 12)
+("bitwise_rotate_right", 6, 13)"""
         )
 
     assembler(input_file=input_file, output_file=binary_file, log_file=log_file)
 
     tree = ET.parse(log_file)
     root = tree.getroot()
-    assert len(root.findall('instruction')) == 18
+    assert len(root.findall('instruction')) == 20
     assert root.find("instruction").text.startswith("move b=0 c=7")
 
-    interpreter(input_file=binary_file, output_file=output_file, mem_range=(0, 10))
+    interpreter(input_file=binary_file, output_file=output_file, mem_range=(0, 14))
 
     tree = ET.parse(output_file)
     root = tree.getroot()
 
     memory_values = {addr.attrib['index']: int(addr.text) for addr in root.findall("address")}
-    assert memory_values['0'] == 100
-    assert memory_values['1'] == 100
-    assert memory_values['2'] == 100
-    assert memory_values['3'] == 100
-    assert memory_values['4'] == 100
-    assert memory_values['5'] == 100
-    assert memory_values['6'] == 100
+    for i in range(7):
+        expected_value = (memory_values[str(i)] >> 1) | ((memory_values[str(i)] & 1) << 7)
+        assert memory_values[str(i + 7)] == expected_value
 
-    for addr in range(7, 10):
-        assert memory_values[str(addr)] == 0
 def test_interpreter(tmp_path):
     input_file = tmp_path / "input.bin"
     output_file = tmp_path / "output.xml"
@@ -100,7 +97,6 @@ def test_parse_binary_commands():
     bc = b''
     result = parse_binary_commands(bc)
     assert result == []
-
 
 
 def test_load_constant():
